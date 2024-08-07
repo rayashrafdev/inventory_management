@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -30,4 +31,11 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+=======
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+>>>>>>> 591627a71416a913a67a02b87c03a4aa84c9606c
 }
