@@ -1,39 +1,37 @@
-import React from 'react';
-import { Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import { Inventory, AddShoppingCart, CameraAlt } from '@mui/icons-material';
 import Link from 'next/link';
+import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import HomeIcon from '@mui/icons-material/Home';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import CameraIcon from '@mui/icons-material/Camera';
 
 const Sidebar = () => {
   return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: 240,
-        flexShrink: 0,
-        [`& .MuiDrawer-paper`]: { width: 240, boxSizing: 'border-box' },
-      }}
-    >
-      <List>
-        <ListItem button component={Link} href="/">
+    <List>
+      <Link href="/" passHref>
+        <ListItem button>
           <ListItemIcon>
-            <Inventory />
+            <HomeIcon />
           </ListItemIcon>
           <ListItemText primary="Home" />
         </ListItem>
-        <ListItem button component={Link} href="/inventory">
+      </Link>
+      <Link href="/inventory" passHref>
+        <ListItem button>
           <ListItemIcon>
-            <AddShoppingCart />
+            <InventoryIcon />
           </ListItemIcon>
           <ListItemText primary="Inventory" />
         </ListItem>
-        <ListItem button component={Link} href="/camera">
+      </Link>
+      <Link href="/camera" passHref>
+        <ListItem button>
           <ListItemIcon>
-            <CameraAlt />
+            <CameraIcon />
           </ListItemIcon>
           <ListItemText primary="AI Camera" />
         </ListItem>
-      </List>
-    </Drawer>
+      </Link>
+    </List>
   );
 };
 

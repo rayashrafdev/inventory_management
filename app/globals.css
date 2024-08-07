@@ -1,4 +1,4 @@
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -30,4 +30,13 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+} */
+/* Add your global CSS styles here */
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
