@@ -11,7 +11,6 @@
   "dependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
-<<<<<<< HEAD
     "@mui/icons-material": "^5.16.6",
     "@mui/material": "^5.16.6",
     "axios": "^1.7.3",
@@ -20,12 +19,6 @@
     "next": "14.2.5",
     "react": "^18",
     "react-camera-pro": "^1.4.0",
-=======
-    "@mui/material": "^5.16.6",
-    "firebase": "^10.12.4",
-    "next": "14.2.5",
-    "react": "^18",
->>>>>>> 591627a71416a913a67a02b87c03a4aa84c9606c
     "react-dom": "^18"
   },
   "devDependencies": {
