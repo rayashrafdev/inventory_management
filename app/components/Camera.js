@@ -1,100 +1,151 @@
+'use client';
+
 import React, { useState, useRef } from 'react';
-import { Box, Button, Typography, TextField } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
+import { firestore } from '../../firebase';
+import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
 
-const Camera = () => {
-  const [isCameraOpen, setIsCameraOpen] = useState(false);
+const CameraComponent = () => {
   const [image, setImage] = useState(null);
-  const fileInputRef = useRef();
+  const [prediction, setPrediction] = useState('');
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
 
-  const openCamera = () => {
+  const openCamera = async () => {
     setIsCameraOpen(true);
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    videoRef.current.srcObject = stream;
   };
 
   const closeCamera = () => {
     setIsCameraOpen(false);
-    setImage(null);
+    let tracks = videoRef.current.srcObject.getTracks();
+    tracks.forEach(track => track.stop());
+    videoRef.current.srcObject = null;
   };
 
   const captureImage = () => {
-    // Assuming you have a way to capture the image from the camera
-    // Placeholder code for capturing an image
-    const capturedImage = 'data:image/jpeg;base64,...'; // Replace with actual captured image data
-    setImage(capturedImage);
-    setIsCameraOpen(false);
+    const context = canvasRef.current.getContext('2d');
+    context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+    const dataUrl = canvasRef.current.toDataURL('image/png');
+    setImage(dataUrl);
+    closeCamera();
   };
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
+  const handleUploadAndPredict = () => {
+    if (!image) {
+      alert('Please capture or upload an image first.');
+      return;
+    }
+    // Add your prediction logic here
+    const fakePrediction = 'apple'; // Replace this with your actual prediction logic
+    setPrediction(fakePrediction);
+  };
+
+  const addItemToPantry = async () => {
+    const docRef = doc(collection(firestore, 'inventory'), prediction);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      await setDoc(docRef, { quantity: docSnap.data().quantity + 1 });
+    } else {
+      await setDoc(docRef, { quantity: 1 });
+    }
+  };
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onload = () => {
         setImage(reader.result);
+        setPrediction(''); // Clear the previous prediction when a new image is uploaded
       };
       reader.readAsDataURL(file);
     }
   };
 
   return (
-    <Box p={4} textAlign="center">
-      <Typography variant="h4" component="h1" gutterBottom>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        p: 3,
+        bgcolor: '#f5f5f5',
+        height: '100vh',
+      }}
+    >
+      <Typography variant="h3" gutterBottom>
         AI Camera
       </Typography>
       <Typography variant="body1" gutterBottom>
         Use the camera to capture an image or upload from your device to predict.
       </Typography>
-      {isCameraOpen ? (
-        <Box mt={2}>
-          {/* Placeholder for camera view */}
-          <Box width="100%" height="300px" bgcolor="black" mb={2}></Box>
-          <Button variant="contained" color="primary" onClick={captureImage} sx={{ mr: 2 }}>
-            Capture
-          </Button>
-          <Button variant="contained" color="secondary" onClick={closeCamera}>
-            Close Camera
-          </Button>
-        </Box>
-      ) : (
-        <Box mt={2}>
-          <Button variant="contained" color="primary" onClick={openCamera} sx={{ mr: 2 }}>
-            Open Camera
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            component="label"
-          >
-            Upload Image
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-            />
-          </Button>
-        </Box>
+      {isCameraOpen && (
+        <Box
+          component="video"
+          ref={videoRef}
+          autoPlay
+          sx={{ width: '100%', maxWidth: 400, mb: 2, border: 'none' }}
+        />
       )}
+      <Box
+        component="canvas"
+        ref={canvasRef}
+        sx={{ display: 'none', width: '100%', maxWidth: 400 }}
+      />
       {image && (
-        <Box mt={4}>
-          <Typography variant="h6" component="h2" gutterBottom>
-            Uploaded Image:
-          </Typography>
-          <Box
-            component="img"
-            src={image}
-            alt="Uploaded"
-            sx={{ width: '100%', maxWidth: 300, borderRadius: 2, boxShadow: 2 }}
-          />
-          <Button variant="contained" color="secondary" onClick={() => setImage(null)} sx={{ mt: 2 }}>
-            Remove Image
-          </Button>
-        </Box>
+        <Box
+          component="img"
+          src={image}
+          alt="Captured"
+          sx={{ width: '100%', maxWidth: 400, mb: 2 }}
+        />
       )}
-      <Button variant="contained" color="success" sx={{ mt: 2 }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+        <Button variant="contained" color="primary" onClick={openCamera} disabled={isCameraOpen}>
+          Open Camera
+        </Button>
+        <Button variant="contained" color="primary" onClick={captureImage} disabled={!isCameraOpen}>
+          Capture
+        </Button>
+        <Button variant="contained" color="primary" onClick={closeCamera} disabled={!isCameraOpen}>
+          Close Camera
+        </Button>
+      </Box>
+      <Box sx={{ mb: 2 }}>
+        <input
+          accept="image/*"
+          style={{ display: 'none' }}
+          id="file-input"
+          type="file"
+          onChange={handleImageUpload}
+        />
+        <Button variant="contained" color="primary" onClick={() => document.getElementById('file-input').click()}>
+          Upload File
+        </Button>
+      </Box>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={handleUploadAndPredict}
+        sx={{ mb: 2 }}
+      >
         Upload and Predict
       </Button>
+      {prediction && (
+        <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Typography variant="body1" color="textSecondary" gutterBottom>
+            Prediction: {prediction}
+          </Typography>
+          <Button variant="contained" onClick={addItemToPantry}>
+            Add to Pantry
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };
 
-export default Camera;
+export default CameraComponent;
